@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  web:
+    build: .
+    depends_on:
+      - postgres
+    ports:
+      - 443:443
+      - 1935:1935

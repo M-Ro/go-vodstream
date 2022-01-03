@@ -1,0 +1,9 @@
+
+postgres:
+  host: "postgres"
+  port: "5432"
+  password: "example"
+  user: "postgres"
+  database: "postgres"
+stream_ingester:
+  bind_address: ":1935"
