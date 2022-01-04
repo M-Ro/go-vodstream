@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/M-Ro/go-vodstream/cmd/streamingester"
+	"github.com/M-Ro/go-vodstream/cmd/web"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -13,6 +14,7 @@ var rootCmd = &cobra.Command{}
 // init registers all the available commands to the cli
 func init() {
 	rootCmd.AddCommand(streamingester.NewCmd())
+	rootCmd.AddCommand(web.NewCmd())
 }
 
 // initialises viper config library.
