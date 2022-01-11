@@ -7,3 +7,5 @@ postgres:
   database: "postgres"
 stream_ingester:
   bind_address: ":1935"
+web:
+  bind_address: ":8933"

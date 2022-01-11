@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/M-Ro/go-vodstream/cmd/streamingester"
-	"github.com/M-Ro/go-vodstream/cmd/web"
+	"git.thorn.sh/Thorn/go-vodstream/cmd/streamingester"
+	"git.thorn.sh/Thorn/go-vodstream/cmd/web"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"

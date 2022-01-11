@@ -1,9 +1,11 @@
 package web
 
 import (
-	"embed"
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"net/http"
 )
 
 // NewCmd registers the cobra command.
@@ -15,45 +17,25 @@ func NewCmd() *cobra.Command {
 	}
 }
 
-//go:embed static
-var content embed.FS
-
+// Start the http listen server
 func Start(_ *cobra.Command, _ []string) {
 	log.Info("Starting web frontend")
 
-	if !filesExist(content) {
+	if !FilesExist() {
 		log.Fatal("Missing files for web delivery. " +
 			"Ensure static directory contains compiled js/css artifacts from frontend repository.")
 	}
 
-}
+	bindAddress := viper.GetString("web.bind_address")
 
-// Remove element from string slice, order not preserved
-func remove(s []string, i int) []string {
-	s[i] = s[len(s)-1]
-	return s[:len(s)-1]
-}
+	r := mux.NewRouter()
 
-// FilesExist returns false if the minimum files required for web frontend delivery
-// have not been compiled into the web binary.
-func filesExist(fs embed.FS) bool {
-	missingFiles := []string{"index.html", "app.js", "app.css"}
+	r.Handle("/{file}", FsHandler())
+	r.HandleFunc("/", IndexHandler)
 
-	files, err := fs.ReadDir("static")
+	log.Println("Listening on" + bindAddress + "..")
+	err := http.ListenAndServe(bindAddress, r)
 	if err != nil {
-		log.Error(err.Error())
-		return false
+		log.Fatal(err)
 	}
-
-	for _, filename := range files {
-		log.Info(filename.Name())
-
-		for index, missingFilename := range missingFiles {
-			if filename.Name() == missingFilename {
-				missingFiles = remove(missingFiles, index)
-			}
-		}
-	}
-
-	return len(missingFiles) == 0
 }
