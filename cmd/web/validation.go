@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Remove element from string slice, order not preserved
+// Remove element from string slice, order is not preserved.
 func remove(s []string, i int) []string {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]

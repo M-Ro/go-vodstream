@@ -17,13 +17,13 @@ func NewCmd() *cobra.Command {
 	}
 }
 
-// Start the http listen server
+// Start the http(s) listen server.
 func Start(_ *cobra.Command, _ []string) {
 	log.Info("Starting web frontend")
 
 	if !FilesExist() {
 		log.Fatal("Missing files for web delivery. " +
-			"Ensure static directory contains compiled js/css artifacts from frontend repository.")
+			"Ensure static directory contains compiled js/css assets from frontend repository.")
 	}
 
 	bindAddress := viper.GetString("web.bind_address")
