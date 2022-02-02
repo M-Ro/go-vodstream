@@ -3,6 +3,7 @@ module git.thorn.sh/Thorn/go-vodstream
 go 1.16
 
 require (
+	github.com/google/go-cmp v0.5.7
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/nareix/joy4 v0.0.0-20200507095837-05a4ffbb5369

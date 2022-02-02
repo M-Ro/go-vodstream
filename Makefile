@@ -9,5 +9,8 @@ all: $(TARGET)
 vodstream:
 	$(FLAGS) go build -o build/$(TARGET) $(ENTRY)
 
+tests:
+	go test ./...
+
 clean:
 	rm -f build/$(TARGET)
