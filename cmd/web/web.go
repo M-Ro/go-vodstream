@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// NewCmd registers the cobra command.
+// NewCmd registers the cobra command to be called from the CLI.
 func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "web",
