@@ -12,3 +12,7 @@ web:
 api:
   users:
     bind_address: ":39510"
+auth:
+  signing_secret: "changeThisInProd"
+  ident: "https://mydomain.url" # Token Issuer Ident
+  token_duration: "6h"
