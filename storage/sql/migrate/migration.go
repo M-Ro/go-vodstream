@@ -1,17 +1,24 @@
 package migrate
 
 import (
+	sql2 "database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"io/fs"
+	"github.com/spf13/afero"
 	"log"
+	"os"
 	"regexp"
 )
 
 // MigrationFS contains all the SQL migration files.
 //go:embed migrations/*.sql
 var MigrationFS embed.FS
+
+var (
+	ErrHalfMigration = errors.New("migration is missing up/down component")
+)
 
 const migrationsTableName = "migrations"
 
@@ -20,7 +27,6 @@ type Migration struct {
 	MigrationName string
 	UpQuery       string
 	DownQuery     string
-	db            *sqlx.DB
 }
 
 type MigrationType int
@@ -30,12 +36,12 @@ const (
 	DownMigration
 )
 
-func (m Migration) Up() error {
+func (m Migration) Up(tx *sqlx.Tx) error {
 	// STUB
 	return nil
 }
 
-func (m Migration) Down() error {
+func (m Migration) Down(tx *sqlx.Tx) error {
 	// STUB
 	return nil
 }
@@ -50,24 +56,74 @@ func createMigrationTable(db *sqlx.DB) {
 	db.MustExec(sql)
 }
 
-func getMigrationsForTable(dir []fs.DirEntry, tableName string) []Migration {
+func getMigrationsForTable(fs afero.Fs, files []os.FileInfo, tableName string) ([]Migration, error) {
+	strPattern := fmt.Sprintf(`^(%s_\d{12}_.+)_(down|up)\.sql$`, tableName)
+	pattern := regexp.MustCompile(strPattern)
+
 	migrations := make([]Migration, 0)
 
-	/*for _, dirEntry := range dir {
-		if dirEntry.IsDir() {
+	for _, fileinfo := range files {
+		if fileinfo.IsDir() {
 			continue
 		}
 
-		valid, migrationType := validMigrationFile(dirEntry.Name(), tableName)
+		valid, migrationType := validMigrationFile(fileinfo.Name(), tableName)
 		if !valid {
 			continue
 		}
 
+		match := pattern.FindStringSubmatch(fileinfo.Name())
+		if match == nil || len(match) != 3 {
+			continue
+		}
 
-	} */
+		migrationName := match[1]
+		found := false
 
-	// STUB
-	return migrations
+		// Read file contents
+		content, err := afero.ReadFile(fs, fileinfo.Name())
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// search for an existing migration and fill the missing up/down query
+		for index, v := range migrations {
+			if v.MigrationName == migrationName {
+				found = true
+
+				if migrationType == UpMigration {
+					migrations[index].UpQuery = string(content)
+				} else {
+					migrations[index].DownQuery = string(content)
+				}
+			}
+		}
+
+		// if no migration found, add a new one to the list
+		if !found {
+			newMigration := Migration{
+				TableName:     tableName,
+				MigrationName: migrationName,
+			}
+
+			if migrationType == UpMigration {
+				newMigration.UpQuery = string(content)
+			} else {
+				newMigration.DownQuery = string(content)
+			}
+
+			migrations = append(migrations, newMigration)
+		}
+	}
+
+	// verify all migrations have an up and down query.
+	for _, v := range migrations {
+		if v.UpQuery == "" || v.DownQuery == "" {
+			return []Migration{}, ErrHalfMigration
+		}
+	}
+
+	return migrations, nil
 }
 
 // runMigration runs the given migration. The SQL called (Up or Down) is decided
@@ -102,33 +158,43 @@ func validMigrationFile(filename string, tableName string) (bool, MigrationType)
 
 // lastBatchNumber returns the highest value in the batch column of the migrations table
 func lastBatchNumber(db *sqlx.DB) int {
-	sql := `SELECT MAX(batch) from $1`
+	sql := fmt.Sprintf(`SELECT MAX(batch) from %s`, migrationsTableName)
 
-	row := db.QueryRow(sql, migrationsTableName)
+	row := db.QueryRow(sql)
 
-	var batch int
+	var batch sql2.NullInt32
 	err := row.Scan(&batch)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return batch
+	if !batch.Valid {
+		return 0
+	}
+
+	return (int)(batch.Int32)
 }
 
 // shouldRunMigration returns true if a migration by this name hasn't been run
 // in a previous batch.
 func shouldRunMigration(db *sqlx.DB, migrationName string) bool {
-	sql := `SELECT id FROM $1 WHERE migration = $2`
+	sql := fmt.Sprintf(`SELECT id FROM %s WHERE migration = $1 LIMIT 1`, migrationsTableName)
 
-	row := db.QueryRow(sql, migrationsTableName, migrationName)
+	row := db.QueryRow(sql, migrationName)
 
-	var id int
+	var id sql2.NullInt32
 	err := row.Scan(&id)
+
+	if err == sql2.ErrNoRows {
+		return true
+	}
+
+	// Any other error is fatal
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return id >= 0
+	return !id.Valid
 }
 
 // migrationTableExists returns true if the migrations table exists in the given database.
@@ -138,7 +204,7 @@ func migrationTableExists(db *sqlx.DB) bool {
 			pg_tables
 		WHERE 
 			schemaname = 'public' AND 
-			tablename  = '$1'
+			tablename  = $1
 		)`
 
 	row := db.QueryRow(sql, migrationsTableName)
