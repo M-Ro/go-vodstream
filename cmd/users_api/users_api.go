@@ -2,6 +2,7 @@ package users_api
 
 import (
 	"git.thorn.sh/Thorn/go-vodstream/cmd/users_api/handlers"
+	"git.thorn.sh/Thorn/go-vodstream/storage/sql"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,7 +25,11 @@ func Start(_ *cobra.Command, _ []string) {
 
 	bindAddress := viper.GetString("api.users.bind_address")
 
-	handler := handlers.AuthHandler{}
+	db := sql.NewDbConn()
+	storage := sql.NewUserStorage(db)
+
+	handler := handlers.NewAuthHandler(storage)
+
 	r := mux.NewRouter()
 	handler.RegisterRoutes(r)
 

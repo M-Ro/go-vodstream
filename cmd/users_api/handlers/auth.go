@@ -5,10 +5,12 @@ import (
 	"errors"
 	"git.thorn.sh/Thorn/go-vodstream/api"
 	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
+	"git.thorn.sh/Thorn/go-vodstream/storage/sql"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -32,7 +34,8 @@ type AuthHandlerConfig struct {
 }
 
 type AuthHandler struct {
-	config AuthHandlerConfig
+	config      AuthHandlerConfig
+	userStorage *sql.UserStorage
 }
 
 func (h *AuthHandler) RegisterRoutes(r *mux.Router) {
@@ -80,7 +83,20 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Errorf("Register failed: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
+	var registerRequest api.RegisterRequest
+	err = json.Unmarshal(body, &registerRequest)
+	if err != nil {
+		log.Errorf("Register failed: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 }
 
 func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
@@ -103,8 +119,9 @@ func getConfig() AuthHandlerConfig {
 	}
 }
 
-func NewAuthHandler() AuthHandler {
+func NewAuthHandler(userStorage *sql.UserStorage) AuthHandler {
 	return AuthHandler{
-		config: getConfig(),
+		config:      getConfig(),
+		userStorage: userStorage,
 	}
 }
