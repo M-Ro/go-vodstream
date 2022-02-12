@@ -5,7 +5,7 @@ import (
 	sql2 "database/sql"
 	"errors"
 	"fmt"
-	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
+	"git.thorn.sh/Thorn/go-vodstream/internal/paginate"
 	"git.thorn.sh/Thorn/go-vodstream/storage"
 	"github.com/jmoiron/sqlx"
 	log "github.com/sirupsen/logrus"
@@ -54,7 +54,7 @@ func (s UserStorage) All(ctx context.Context) ([]storage.User, error) {
 }
 
 // List returns a set of rows from the users table specified by the given pagination options.
-func (s UserStorage) List(ctx context.Context, options domain.PaginateQueryOptions) ([]storage.User, error) {
+func (s UserStorage) List(ctx context.Context, options paginate.PaginateQueryOptions) ([]storage.User, error) {
 	users := make([]storage.User, 0)
 
 	sql := fmt.Sprintf(

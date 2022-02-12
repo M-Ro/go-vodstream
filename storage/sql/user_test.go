@@ -4,7 +4,7 @@ import (
 	"context"
 	sql2 "database/sql"
 	"fmt"
-	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
+	"git.thorn.sh/Thorn/go-vodstream/internal/paginate"
 	"git.thorn.sh/Thorn/go-vodstream/storage"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -188,13 +188,13 @@ func TestUserStorage_List(t *testing.T) {
 
 	tests := []struct {
 		testName        string
-		paginateOptions domain.PaginateQueryOptions
+		paginateOptions paginate.PaginateQueryOptions
 		expectedReturn  []storage.User
 		expectedError   error
 	}{
 		{
 			testName:        "test paginate defaults",
-			paginateOptions: domain.NewPaginateOptions(),
+			paginateOptions: paginate.NewPaginateOptions(),
 			expectedError:   nil,
 			expectedReturn: []storage.User{
 				{
@@ -209,16 +209,9 @@ func TestUserStorage_List(t *testing.T) {
 			},
 		},
 		{
-			testName: "order by descending",
-			paginateOptions: domain.PaginateQueryOptions{
-				Limit:  25,
-				Offset: 0,
-				Order: domain.PaginateOrder{
-					Field:  "id",
-					Method: domain.OrderMethodDesc,
-				},
-			},
-			expectedError: nil,
+			testName:        "order by descending",
+			paginateOptions: paginate.NewPaginateOptions(paginate.WithOrder(paginate.OrderMethodDesc)),
+			expectedError:   nil,
 			expectedReturn: []storage.User{
 				{
 					Id: 3,
@@ -232,16 +225,9 @@ func TestUserStorage_List(t *testing.T) {
 			},
 		},
 		{
-			testName: "test order field",
-			paginateOptions: domain.PaginateQueryOptions{
-				Limit:  25,
-				Offset: 0,
-				Order: domain.PaginateOrder{
-					Field:  "username",
-					Method: domain.OrderMethodAsc,
-				},
-			},
-			expectedError: nil,
+			testName:        "test order field",
+			paginateOptions: paginate.NewPaginateOptions(paginate.WithOrderField("username")),
+			expectedError:   nil,
 			expectedReturn: []storage.User{
 				{
 					Id: 1,
@@ -255,16 +241,9 @@ func TestUserStorage_List(t *testing.T) {
 			},
 		},
 		{
-			testName: "test limit",
-			paginateOptions: domain.PaginateQueryOptions{
-				Limit:  2,
-				Offset: 0,
-				Order: domain.PaginateOrder{
-					Field:  "id",
-					Method: domain.OrderMethodAsc,
-				},
-			},
-			expectedError: nil,
+			testName:        "test limit",
+			paginateOptions: paginate.NewPaginateOptions(paginate.WithLimit(2)),
+			expectedError:   nil,
 			expectedReturn: []storage.User{
 				{
 					Id: 1,
@@ -275,16 +254,9 @@ func TestUserStorage_List(t *testing.T) {
 			},
 		},
 		{
-			testName: "test offset",
-			paginateOptions: domain.PaginateQueryOptions{
-				Limit:  2,
-				Offset: 1,
-				Order: domain.PaginateOrder{
-					Field:  "id",
-					Method: domain.OrderMethodAsc,
-				},
-			},
-			expectedError: nil,
+			testName:        "test offset",
+			paginateOptions: paginate.NewPaginateOptions(paginate.WithLimit(2), paginate.WithOffset(1)),
+			expectedError:   nil,
 			expectedReturn: []storage.User{
 				{
 					Id: 2,
@@ -295,17 +267,10 @@ func TestUserStorage_List(t *testing.T) {
 			},
 		},
 		{
-			testName: "test offset larger than row count",
-			paginateOptions: domain.PaginateQueryOptions{
-				Limit:  25,
-				Offset: 250,
-				Order: domain.PaginateOrder{
-					Field:  "id",
-					Method: domain.OrderMethodAsc,
-				},
-			},
-			expectedError:  nil,
-			expectedReturn: []storage.User{},
+			testName:        "test offset larger than row count",
+			paginateOptions: paginate.NewPaginateOptions(paginate.WithOffset(250)),
+			expectedError:   nil,
+			expectedReturn:  []storage.User{},
 		},
 	}
 
