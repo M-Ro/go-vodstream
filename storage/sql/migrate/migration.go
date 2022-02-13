@@ -32,7 +32,7 @@ type Migration struct {
 type MigrationType int
 
 const (
-	UpMigration = iota
+	UpMigration MigrationType = iota
 	DownMigration
 )
 

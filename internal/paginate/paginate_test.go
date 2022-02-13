@@ -6,10 +6,10 @@ import (
 )
 
 func TestNewPaginateOptions(t *testing.T) {
-	expected := PaginateQueryOptions{
+	expected := QueryOptions{
 		Limit:  25,
 		Offset: 0,
-		Order: PaginateOrder{
+		Order: Order{
 			Field:  "id",
 			Method: OrderMethodAsc,
 		},

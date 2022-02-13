@@ -5,29 +5,29 @@ import log "github.com/sirupsen/logrus"
 type OrderMethod string
 
 const (
-	OrderMethodAsc  = "ASC"
-	OrderMethodDesc = "DESC"
+	OrderMethodAsc  OrderMethod = "ASC"
+	OrderMethodDesc             = "DESC"
 )
 
-type PaginateOrder struct {
+type Order struct {
 	Field  string
 	Method OrderMethod
 }
 
-type PaginateQueryOptions struct {
+type QueryOptions struct {
 	Limit  uint
 	Offset uint
-	Order  PaginateOrder
+	Order  Order
 }
 
-type PaginateFuncOption func(options *PaginateQueryOptions)
+type FuncOption func(options *QueryOptions)
 
 // NewPaginateOptions returns a default set of paginate options.
-func NewPaginateOptions(opts ...PaginateFuncOption) PaginateQueryOptions {
-	paginateOptions := PaginateQueryOptions{
+func NewPaginateOptions(opts ...FuncOption) QueryOptions {
+	paginateOptions := QueryOptions{
 		Limit:  25,
 		Offset: 0,
-		Order: PaginateOrder{
+		Order: Order{
 			Field:  "id",
 			Method: OrderMethodAsc,
 		},
@@ -41,8 +41,8 @@ func NewPaginateOptions(opts ...PaginateFuncOption) PaginateQueryOptions {
 	return paginateOptions
 }
 
-func WithLimit(limit uint) PaginateFuncOption {
-	return func(p *PaginateQueryOptions) {
+func WithLimit(limit uint) FuncOption {
+	return func(p *QueryOptions) {
 		if limit <= 0 || limit > 1000 {
 			log.Warnf("limit set outside of bounds, retaining defaults: %v", limit)
 			return
@@ -52,20 +52,20 @@ func WithLimit(limit uint) PaginateFuncOption {
 	}
 }
 
-func WithOffset(offset uint) PaginateFuncOption {
-	return func(p *PaginateQueryOptions) {
+func WithOffset(offset uint) FuncOption {
+	return func(p *QueryOptions) {
 		p.Offset = offset
 	}
 }
 
-func WithOrderField(orderField string) PaginateFuncOption {
-	return func(p *PaginateQueryOptions) {
+func WithOrderField(orderField string) FuncOption {
+	return func(p *QueryOptions) {
 		p.Order.Field = orderField
 	}
 }
 
-func WithOrder(method OrderMethod) PaginateFuncOption {
-	return func(p *PaginateQueryOptions) {
+func WithOrder(method OrderMethod) FuncOption {
+	return func(p *QueryOptions) {
 		if method != OrderMethodAsc && method != OrderMethodDesc {
 			log.Warnf("invalid order set, retaining default: %s", method)
 			return

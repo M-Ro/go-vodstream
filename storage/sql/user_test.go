@@ -188,7 +188,7 @@ func TestUserStorage_List(t *testing.T) {
 
 	tests := []struct {
 		testName        string
-		paginateOptions paginate.PaginateQueryOptions
+		paginateOptions paginate.QueryOptions
 		expectedReturn  []storage.User
 		expectedError   error
 	}{

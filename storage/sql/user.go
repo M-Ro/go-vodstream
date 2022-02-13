@@ -54,7 +54,7 @@ func (s UserStorage) All(ctx context.Context) ([]storage.User, error) {
 }
 
 // List returns a set of rows from the users table specified by the given pagination options.
-func (s UserStorage) List(ctx context.Context, options paginate.PaginateQueryOptions) ([]storage.User, error) {
+func (s UserStorage) List(ctx context.Context, options paginate.QueryOptions) ([]storage.User, error) {
 	users := make([]storage.User, 0)
 
 	sql := fmt.Sprintf(
