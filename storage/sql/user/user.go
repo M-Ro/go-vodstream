@@ -1,4 +1,4 @@
-package sql
+package user
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 
 const UsersTableName = "users"
 
-type UserStorage struct {
+type SqlUserStorage struct {
 	DB *sqlx.DB
 }
 
@@ -29,7 +29,7 @@ func insertTableName(query string) string {
 }
 
 // All returns all rows in the users table.
-func (s UserStorage) All(ctx context.Context) ([]storage.User, error) {
+func (s SqlUserStorage) All(ctx context.Context) ([]storage.User, error) {
 	users := make([]storage.User, 0)
 
 	rows, err := s.DB.QueryxContext(ctx, insertTableName("SELECT * FROM %s ORDER BY id ASC"))
@@ -54,7 +54,7 @@ func (s UserStorage) All(ctx context.Context) ([]storage.User, error) {
 }
 
 // List returns a set of rows from the users table specified by the given pagination options.
-func (s UserStorage) List(ctx context.Context, options paginate.QueryOptions) ([]storage.User, error) {
+func (s SqlUserStorage) List(ctx context.Context, options paginate.QueryOptions) ([]storage.User, error) {
 	users := make([]storage.User, 0)
 
 	sql := fmt.Sprintf(
@@ -83,7 +83,7 @@ func (s UserStorage) List(ctx context.Context, options paginate.QueryOptions) ([
 }
 
 // GetByID returns the user with the given ID, or nil on failure.
-func (s UserStorage) GetByID(ctx context.Context, id uint64) *storage.User {
+func (s SqlUserStorage) GetByID(ctx context.Context, id uint64) *storage.User {
 	row := s.DB.QueryRowxContext(ctx, insertTableName(`SELECT * from %s WHERE id = $1`), id)
 
 	var user storage.User
@@ -99,7 +99,7 @@ func (s UserStorage) GetByID(ctx context.Context, id uint64) *storage.User {
 }
 
 // GetByUsername returns the user with the given username, or nil on failure.
-func (s UserStorage) GetByUsername(ctx context.Context, username string) *storage.User {
+func (s SqlUserStorage) GetByUsername(ctx context.Context, username string) *storage.User {
 	row := s.DB.QueryRowxContext(ctx, insertTableName(`SELECT * from %s WHERE username ILIKE $1`), username)
 
 	var user storage.User
@@ -115,7 +115,7 @@ func (s UserStorage) GetByUsername(ctx context.Context, username string) *storag
 }
 
 // GetByEmail returns the user with the given email, or nil on failure.
-func (s UserStorage) GetByEmail(ctx context.Context, email string) *storage.User {
+func (s SqlUserStorage) GetByEmail(ctx context.Context, email string) *storage.User {
 	row := s.DB.QueryRowxContext(ctx, insertTableName(`SELECT * from %s WHERE email ILIKE $1`), email)
 
 	var user storage.User
@@ -131,10 +131,10 @@ func (s UserStorage) GetByEmail(ctx context.Context, email string) *storage.User
 }
 
 // Delete removes a user with the given ID from the table. Only returns on db error.
-func (s UserStorage) Delete(ctx context.Context, id uint64) error {
+func (s SqlUserStorage) Delete(ctx context.Context, id uint64) error {
 	_, err := s.DB.ExecContext(ctx, insertTableName(`DELETE FROM %s WHERE id = $1`), id)
 	if err != nil {
-		log.Errorf("UserStorage::Delete: %s", err)
+		log.Errorf("SqlUserStorage::Delete: %s", err)
 	}
 
 	return err
@@ -142,7 +142,7 @@ func (s UserStorage) Delete(ctx context.Context, id uint64) error {
 
 // Insert takes a storage model and inserts into the db. Returns an error on failure.
 // Upon insertion the ID field of the model will be set.
-func (s UserStorage) Insert(ctx context.Context, user *storage.User) error {
+func (s SqlUserStorage) Insert(ctx context.Context, user *storage.User) error {
 	user.CreatedAt = time.Now().Truncate(time.Microsecond)
 	user.UpdatedAt = user.CreatedAt
 
@@ -162,7 +162,7 @@ func (s UserStorage) Insert(ctx context.Context, user *storage.User) error {
 
 // Update takes a storage model and updates row contents for the user at the given ID.
 // Returns error on failure, or if a user was not found with the given id.
-func (s UserStorage) Update(ctx context.Context, id uint64, user *storage.User) error {
+func (s SqlUserStorage) Update(ctx context.Context, id uint64, user *storage.User) error {
 	user.UpdatedAt = time.Now().Truncate(time.Microsecond)
 
 	result, err := s.DB.ExecContext(
@@ -191,10 +191,10 @@ func (s UserStorage) Update(ctx context.Context, id uint64, user *storage.User) 
 	return nil
 }
 
-// NewUserStorage instantiates a new UserStorage object.
-func NewUserStorage(db *sqlx.DB) *UserStorage {
-	storage := new(UserStorage)
-	storage.DB = db
+// NewUserStorage instantiates a new SqlUserStorage object.
+func NewUserStorage(db *sqlx.DB) *SqlUserStorage {
+	newStorage := new(SqlUserStorage)
+	newStorage.DB = db
 
-	return storage
+	return newStorage
 }

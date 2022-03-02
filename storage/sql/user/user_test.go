@@ -1,4 +1,4 @@
-package sql
+package user
 
 import (
 	"context"
@@ -92,26 +92,26 @@ func seed(db *sqlx.DB) {
 	db.MustExec(fmt.Sprintf("DELETE FROM %s", UsersTableName))
 	db.MustExec(fmt.Sprintf("ALTER SEQUENCE %s_id_seq RESTART WITH 1", UsersTableName))
 
-	time := time.Now().Truncate(time.Microsecond)
+	curTime := time.Now().Truncate(time.Microsecond)
 
 	users := []storage.User{
 		{
 			Username:  "testUser1",
 			Email:     "testUser1@example.com",
-			CreatedAt: time,
-			UpdatedAt: time,
+			CreatedAt: curTime,
+			UpdatedAt: curTime,
 		},
 		{
 			Username:  "testUser2",
 			Email:     "testUser2@example.com",
-			CreatedAt: time,
-			UpdatedAt: time,
+			CreatedAt: curTime,
+			UpdatedAt: curTime,
 		},
 		{
 			Username:  "testUser3",
 			Email:     "testUser3@example.com",
-			CreatedAt: time,
-			UpdatedAt: time,
+			CreatedAt: curTime,
+			UpdatedAt: curTime,
 		},
 	}
 
