@@ -1,4 +1,4 @@
-module git.thorn.sh/Thorn/go-vodstream
+module github.com/M-Ro/go-vodstream
 
 go 1.16
 

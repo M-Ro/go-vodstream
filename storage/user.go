@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
+	"github.com/M-Ro/go-vodstream/internal/domain/user"
 	"time"
 )
 
@@ -21,8 +21,8 @@ type User struct {
 }
 
 // UsersToDomain converts storage user models to domain models.
-func UsersToDomain(users []User) []domain.User {
-	convertedUsers := make([]domain.User, len(users))
+func UsersToDomain(users []User) []user.User {
+	convertedUsers := make([]user.User, len(users))
 
 	for i, user := range users {
 		convertedUsers[i] = UserToDomain(user)
@@ -32,7 +32,7 @@ func UsersToDomain(users []User) []domain.User {
 }
 
 // UsersToStorage converts domain user models to storage models.
-func UsersToStorage(users []domain.User) []User {
+func UsersToStorage(users []user.User) []User {
 	convertedUsers := make([]User, len(users))
 
 	for i, user := range users {
@@ -43,8 +43,8 @@ func UsersToStorage(users []domain.User) []User {
 }
 
 // UserToDomain converts a storage user model to a domain model.
-func UserToDomain(user User) domain.User {
-	return domain.User{
+func UserToDomain(user User) user.User {
+	return user.User{
 		Id:         user.Id,
 		Username:   user.Username,
 		Email:      user.Email,
@@ -58,7 +58,7 @@ func UserToDomain(user User) domain.User {
 }
 
 // UserToStorage converts a domain user model to a storage model.
-func UserToStorage(user domain.User) User {
+func UserToStorage(user user.User) User {
 	return User{
 		Id:         user.Id,
 		Username:   user.Username,

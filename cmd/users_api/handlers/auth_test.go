@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"git.thorn.sh/Thorn/go-vodstream/api"
+	"github.com/M-Ro/go-vodstream/api"
 	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/mux"
 	"net/http"

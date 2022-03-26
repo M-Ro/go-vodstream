@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 	"errors"
-	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
-	"git.thorn.sh/Thorn/go-vodstream/internal/paginate"
-	"git.thorn.sh/Thorn/go-vodstream/storage"
+	"github.com/M-Ro/go-vodstream/internal/domain/user"
+	"github.com/M-Ro/go-vodstream/internal/paginate"
+	"github.com/M-Ro/go-vodstream/storage"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"testing"
@@ -17,7 +17,7 @@ func TestRepository_All(t *testing.T) {
 		testName      string
 		mockStorage   mockUserStorage
 		expectedError error
-		expectedValue []domain.User
+		expectedValue []user.User
 	}{
 		{
 			testName: "expect nothing with empty empty storage",
@@ -26,7 +26,7 @@ func TestRepository_All(t *testing.T) {
 				ReturnAllError: nil,
 			},
 			expectedError: nil,
-			expectedValue: []domain.User{},
+			expectedValue: []user.User{},
 		},
 		{
 			testName: "expect empty return, with error on storage failure",
@@ -35,7 +35,7 @@ func TestRepository_All(t *testing.T) {
 				ReturnAllError: mockStorageErr,
 			},
 			expectedError: mockStorageErr,
-			expectedValue: []domain.User{},
+			expectedValue: []user.User{},
 		},
 		{
 			testName: "expect correct return from given storage",
@@ -51,7 +51,7 @@ func TestRepository_All(t *testing.T) {
 				ReturnAllError: nil,
 			},
 			expectedError: nil,
-			expectedValue: []domain.User{
+			expectedValue: []user.User{
 				{
 					Id: 0,
 				},
@@ -89,7 +89,7 @@ func TestRepository_List(t *testing.T) {
 		mockStorage     mockUserStorage
 		paginateOptions paginate.QueryOptions
 		expectedError   error
-		expectedValue   []domain.User
+		expectedValue   []user.User
 	}{
 		{
 			testName: "expect empty array with empty storage",
@@ -99,7 +99,7 @@ func TestRepository_List(t *testing.T) {
 			},
 			paginateOptions: paginate.QueryOptions{},
 			expectedError:   nil,
-			expectedValue:   []domain.User{},
+			expectedValue:   []user.User{},
 		},
 		{
 			testName: "expect error when storage fails",
@@ -109,7 +109,7 @@ func TestRepository_List(t *testing.T) {
 			},
 			paginateOptions: paginate.QueryOptions{},
 			expectedError:   ErrUserNotFound,
-			expectedValue:   []domain.User{},
+			expectedValue:   []user.User{},
 		},
 		{
 			testName: "expect correct output",
@@ -129,7 +129,7 @@ func TestRepository_List(t *testing.T) {
 			},
 			paginateOptions: paginate.QueryOptions{},
 			expectedError:   nil,
-			expectedValue: []domain.User{
+			expectedValue: []user.User{
 				{
 					Id: 1,
 				},
@@ -170,7 +170,7 @@ func TestRepository_GetByID(t *testing.T) {
 		mockStorage   mockUserStorage
 		userId        uint64
 		expectedError error
-		expectedValue domain.User
+		expectedValue user.User
 	}{
 		{
 			testName: "expect error with empty storage",
@@ -178,7 +178,7 @@ func TestRepository_GetByID(t *testing.T) {
 				ReturnGetByIDUser: nil,
 			},
 			userId:        1,
-			expectedValue: domain.User{},
+			expectedValue: user.User{},
 			expectedError: ErrUserNotFound,
 		},
 		{
@@ -189,7 +189,7 @@ func TestRepository_GetByID(t *testing.T) {
 				},
 			},
 			userId: 1,
-			expectedValue: domain.User{
+			expectedValue: user.User{
 				Id: 1,
 			},
 			expectedError: nil,
@@ -223,7 +223,7 @@ func TestRepository_GetByEmail(t *testing.T) {
 		mockStorage   mockUserStorage
 		email         string
 		expectedError error
-		expectedValue domain.User
+		expectedValue user.User
 	}{
 		{
 			testName: "expect error with empty storage",
@@ -231,7 +231,7 @@ func TestRepository_GetByEmail(t *testing.T) {
 				ReturnGetByEmailUser: nil,
 			},
 			email:         "testUser@testUser.com",
-			expectedValue: domain.User{},
+			expectedValue: user.User{},
 			expectedError: ErrUserNotFound,
 		},
 		{
@@ -242,7 +242,7 @@ func TestRepository_GetByEmail(t *testing.T) {
 				},
 			},
 			email: "testUser@testUser.com",
-			expectedValue: domain.User{
+			expectedValue: user.User{
 				Email: "testUser@testUser.com",
 			},
 			expectedError: nil,
@@ -276,7 +276,7 @@ func TestRepository_GetByUsername(t *testing.T) {
 		mockStorage   mockUserStorage
 		username      string
 		expectedError error
-		expectedValue domain.User
+		expectedValue user.User
 	}{
 		{
 			testName: "expect error with empty storage",
@@ -284,7 +284,7 @@ func TestRepository_GetByUsername(t *testing.T) {
 				ReturnGetByUsernameUser: nil,
 			},
 			username:      "testUser",
-			expectedValue: domain.User{},
+			expectedValue: user.User{},
 			expectedError: ErrUserNotFound,
 		},
 		{
@@ -295,7 +295,7 @@ func TestRepository_GetByUsername(t *testing.T) {
 				},
 			},
 			username: "testUser",
-			expectedValue: domain.User{
+			expectedValue: user.User{
 				Username: "testUser",
 			},
 			expectedError: nil,
@@ -327,9 +327,9 @@ func TestRepository_Insert(t *testing.T) {
 	tests := []struct {
 		testName       string
 		mockStorage    mockUserStorage
-		user           domain.User
+		user           user.User
 		expectedError  error
-		expectedResult domain.User
+		expectedResult user.User
 	}{
 		{
 			testName: "expect error on storage failure",
@@ -337,12 +337,12 @@ func TestRepository_Insert(t *testing.T) {
 				ReturnInsertError: mockStorageErr,
 				ReturnInsertId:    0,
 			},
-			user: domain.User{
+			user: user.User{
 				Username: "testUser",
 				Email:    "testUser@blah",
 			},
 			expectedError: mockStorageErr,
-			expectedResult: domain.User{
+			expectedResult: user.User{
 				Username: "testUser",
 				Email:    "testUser@blah",
 			},
@@ -353,13 +353,13 @@ func TestRepository_Insert(t *testing.T) {
 				ReturnInsertError: nil,
 				ReturnInsertId:    1,
 			},
-			user: domain.User{
+			user: user.User{
 				Id:       0,
 				Username: "testUser",
 				Email:    "testUser@blah",
 			},
 			expectedError: nil,
-			expectedResult: domain.User{
+			expectedResult: user.User{
 				Id:       1,
 				Username: "testUser",
 				Email:    "testUser@blah",
@@ -396,9 +396,9 @@ func TestRepository_Update(t *testing.T) {
 	tests := []struct {
 		testName      string
 		mockStorage   mockUserStorage
-		user          domain.User
+		user          user.User
 		userId        uint64
-		expectedValue domain.User
+		expectedValue user.User
 		expectedError error
 	}{
 		{
@@ -406,9 +406,9 @@ func TestRepository_Update(t *testing.T) {
 			mockStorage: mockUserStorage{
 				ReturnUpdateError: ErrUserNotFound,
 			},
-			user:          domain.User{},
+			user:          user.User{},
 			userId:        32,
-			expectedValue: domain.User{},
+			expectedValue: user.User{},
 			expectedError: ErrUserNotFound,
 		},
 		{
@@ -417,12 +417,12 @@ func TestRepository_Update(t *testing.T) {
 				ReturnUpdateDateUpdated: time.Now(),
 				ReturnUpdateError:       nil,
 			},
-			user: domain.User{
+			user: user.User{
 				Id:        1,
 				UpdatedAt: time.Time{},
 			},
 			userId: 1,
-			expectedValue: domain.User{
+			expectedValue: user.User{
 				Id:        1,
 				UpdatedAt: time.Now(),
 			},

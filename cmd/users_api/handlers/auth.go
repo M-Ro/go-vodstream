@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"git.thorn.sh/Thorn/go-vodstream/api"
-	"git.thorn.sh/Thorn/go-vodstream/internal/domain"
-	"git.thorn.sh/Thorn/go-vodstream/storage/sql"
+	"github.com/M-Ro/go-vodstream/api"
+	"github.com/M-Ro/go-vodstream/internal/domain"
+	"github.com/M-Ro/go-vodstream/storage/sql"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
